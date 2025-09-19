@@ -1,0 +1,42 @@
+# Global ignores for the repo
+
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Environment files (DO NOT COMMIT SECRETS)
+.env
+.env*
+**/.env
+**/.env*
+
+# Logs
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Coverage / test outputs
+coverage/
+**/coverage/
+
+# Caches and temp
+.tmp/
+.cache/
+**/.tmp/
+**/.cache/
+
+# Build artifacts
+/dist/
+**/dist/
+/build/
+**/build/
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
