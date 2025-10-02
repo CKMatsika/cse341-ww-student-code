@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getProfile, logout } = require('../controllers/native/users.controller');
-const { authenticateToken } = require('../middleware/nativeAuth');
+const { register, login, getProfile, logout } = require('../controllers/users.controller');
+const { authenticateToken } = require('../middleware/auth');
 
 // Public routes
 router.post('/register', register);

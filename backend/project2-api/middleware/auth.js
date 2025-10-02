@@ -1,5 +1,8 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { getDb } = require('../db/connect');
+const { ObjectId } = require('mongodb');
+
+const collection = () => getDb().collection('users');
 
 // Middleware to verify JWT token
 const authenticateToken = async (req, res, next) => {
@@ -12,13 +15,13 @@ const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const user = await collection().findOne({ _id: new ObjectId(decoded.userId) });
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid token' });
     }
 
-    req.user = user;
+    req.user = { userId: user._id.toString(), ...user };
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
