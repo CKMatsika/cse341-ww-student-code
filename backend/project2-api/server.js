@@ -6,6 +6,7 @@ const apiRouter = require('./routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./docs/swagger');
+const uri = process.env.MONGODB_URI;
 
 const app = express();
 const PORT = process.env.PORT || 8081; // avoid conflict with other local servers
