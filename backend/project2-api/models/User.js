@@ -1,65 +1,67 @@
-const mongoose = require('mongoose');
+const { getDb } = require('../db/connect');
 const bcrypt = require('bcrypt');
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    minlength: 3,
-    maxlength: 50
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
+const collection = () => getDb().collection('users');
+
+// Register new user
+const register = async (userData) => {
+  const { username, email, password, role = 'user' } = userData;
+  
+  // Check if user already exists
+  const existingUser = await collection().findOne({
+    $or: [{ email }, { username }]
+  });
+
+  if (existingUser) {
+    throw new Error('User already exists with this email or username');
   }
-});
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
+  // Hash password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
+  // Create new user
+  const user = {
+    username,
+    email,
+    password: hashedPassword,
+    role,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
 
-// Compare password method
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
+  const result = await collection().insertOne(user);
+  return { ...user, _id: result.insertedId };
 };
 
-// Update the updatedAt field before saving
-userSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// Login user
+const login = async (email, password) => {
+  const user = await collection().findOne({ email });
+  if (!user) {
+    throw new Error('Invalid credentials');
+  }
 
-module.exports = mongoose.model('User', userSchema);
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error('Invalid credentials');
+  }
+
+  return user;
+};
+
+// Get user by ID
+const findById = async (id) => {
+  return await collection().findOne({ _id: id });
+};
+
+// Get user by email
+const findByEmail = async (email) => {
+  return await collection().findOne({ email });
+};
+
+module.exports = {
+  register,
+  login,
+  findById,
+  findByEmail
+};
