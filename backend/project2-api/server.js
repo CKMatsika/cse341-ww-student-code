@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { initDb } = require('./db/connect');
+const { connectDB } = require('./utils/db');
 const apiRouter = require('./routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const swaggerUi = require('swagger-ui-express');
@@ -27,11 +27,18 @@ app.use('/api', apiRouter);
 // error handler
 app.use(errorHandler);
 
-// start
-initDb((err) => {
-  if (err) {
-    console.error('Failed to connect to MongoDB:', err.message || err);
+// Start server with database connection
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`API listening on http://localhost:${PORT}`);
+      console.log(`API docs available at http://localhost:${PORT}/api-docs`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
-  app.listen(PORT, () => console.log(`API listening on http://localhost:${PORT}`));
-});
+};
+
+startServer();
