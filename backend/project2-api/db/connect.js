@@ -10,8 +10,8 @@ const initDb = async (callback) => {
       console.log('MongoDB already initialized');
       return callback(null, _client);
     }
-    const uri = process.env.MONGODB_URI;
-    if (!uri) throw new Error('MONGODB_URI not set');
+    const uri = process.env.Mongo_url;
+    if (!uri) throw new Error('Mongo_url not set');
     _client = await MongoClient.connect(uri, { 
       // options can be added here if needed
     });

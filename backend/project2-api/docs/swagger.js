@@ -6,7 +6,12 @@ module.exports = {
     description: 'CRUD API for Books with Authentication and Authors secondary collection'
   },
   servers: [
-    { url: 'http://localhost:' + (process.env.PORT || 8081) }
+    {
+      url: process.env.NODE_ENV === 'production'
+        ? 'https://your-app-name.onrender.com' // Replace with your actual Render URL
+        : 'http://localhost:' + (process.env.PORT || 8081),
+      description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server'
+    }
   ],
   components: {
     securitySchemes: {
@@ -74,6 +79,16 @@ module.exports = {
         security: [{ bearerAuth: [] }],
         responses: {
           200: { description: 'User profile' },
+          401: { description: 'Unauthorized' }
+        }
+      }
+    },
+    '/api/users/logout': {
+      post: {
+        summary: 'Logout user',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: 'Logout successful' },
           401: { description: 'Unauthorized' }
         }
       }
